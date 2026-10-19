@@ -11,7 +11,7 @@ export const mixdropScraper = makeEmbed({
   id: 'mixdrop',
   name: 'MixDrop',
   rank: 198,
-  flags: [flags.IP_LOCKED],
+  flags: [flags.CORS_ALLOWED, flags.IP_LOCKED],
   async scrape(ctx) {
     // Example url: https://mixdrop.co/e/pkwrgp0pizgod0
     // Example url: https://mixdrop.vc/e/pkwrgp0pizgod0
@@ -49,7 +49,7 @@ export const mixdropScraper = makeEmbed({
         {
           id: 'primary',
           type: 'file',
-          flags: [flags.IP_LOCKED],
+          flags: [flags.CORS_ALLOWED, flags.IP_LOCKED],
           captions: [],
           qualities: {
             unknown: {

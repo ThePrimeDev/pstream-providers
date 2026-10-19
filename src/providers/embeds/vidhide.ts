@@ -148,7 +148,7 @@ function makeVidhideScraper(provider: { id: string; name: string; rank: number }
     id: provider.id,
     name: provider.name,
     rank: provider.rank,
-    flags: [flags.IP_LOCKED],
+    flags: [flags.IP_LOCKED, flags.CORS_ALLOWED],
     async scrape(ctx) {
       const headers = {
         Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -211,7 +211,7 @@ function makeVidhideScraper(provider: { id: string; name: string; rank: number }
             type: 'hls',
             playlist: videoUrl,
             headers: directHeaders,
-            flags: [flags.IP_LOCKED],
+            flags: [flags.IP_LOCKED, flags.CORS_ALLOWED],
             captions: subtitles.map((s: { file: string; label: string }, idx: number) => {
               const ext = s.file.split('.').pop()?.toLowerCase();
               const type: 'srt' | 'vtt' = ext === 'srt' ? 'srt' : 'vtt';

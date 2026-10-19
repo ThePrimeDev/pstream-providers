@@ -29,11 +29,17 @@ import { cinemaosEmbeds } from './embeds/cinemaos';
 import { closeLoadScraper } from './embeds/closeload';
 import { droploadScraper } from './embeds/dropload';
 import { filelionsScraper } from './embeds/filelions';
+import { indavideoScraper } from './embeds/indavideo';
 import { madplayBaseEmbed, madplayNsapiEmbed, madplayNsapiVidFastEmbed, madplayRoperEmbed } from './embeds/madplay';
 import { mp4hydraServer1Scraper, mp4hydraServer2Scraper } from './embeds/mp4hydra';
 import { myanimedubScraper } from './embeds/myanimedub';
 import { myanimesubScraper } from './embeds/myanimesub';
 import { ridooScraper } from './embeds/ridoo';
+import { rubyvidScraper } from './embeds/rubyvid';
+import { rpmshareScraper } from './embeds/rpmshare';
+import { okruScraper } from './embeds/okru';
+import { vkScraper } from './embeds/vk';
+import { fsstScraper } from './embeds/fsst';
 import { streamtapeLatinoScraper, streamtapeScraper } from './embeds/streamtape';
 import { streamvidScraper } from './embeds/streamvid';
 import {
@@ -44,8 +50,11 @@ import {
 } from './embeds/streamwish';
 import { supervideoScraper } from './embeds/supervideo';
 import { vidCloudScraper } from './embeds/vidcloud';
+import { vidaraScraper } from './embeds/vidara';
+import { videaScraper } from './embeds/videa';
 import { vidhideEnglishScraper, vidhideLatinoScraper, vidhideSpanishScraper } from './embeds/vidhide';
 import { vidifyEmbeds } from './embeds/vidify';
+import { vidmolyScraper } from './embeds/vidmoly';
 import {
   vidnestAllmoviesEmbed,
   vidnestFlixhqEmbed,
@@ -68,6 +77,7 @@ import {
   VidsrcsuServer9Scraper,
 } from './embeds/vidsrcsu';
 import { viperScraper } from './embeds/viper';
+import { voeScraper } from './embeds/voe';
 import { warezcdnembedHlsScraper } from './embeds/warezcdn/hls';
 import { warezcdnembedMp4Scraper } from './embeds/warezcdn/mp4';
 import { warezPlayerScraper } from './embeds/warezcdn/warezplayer';
@@ -80,6 +90,7 @@ import { cinemaosScraper } from './sources/cinemaos';
 import { coitusScraper } from './sources/coitus';
 import { cuevana3Scraper } from './sources/cuevana3';
 import { debridScraper } from './sources/debrid';
+import { dmdamediaScraper } from './sources/dmdamedia';
 import { embedsuScraper } from './sources/embedsu';
 import { hdRezkaScraper } from './sources/hdrezka';
 import { iosmirrorScraper } from './sources/iosmirror';
@@ -88,6 +99,26 @@ import { lookmovieScraper } from './sources/lookmovie';
 import { madplayScraper } from './sources/madplay';
 import { movies4fScraper } from './sources/movies4f';
 import { myanimeScraper } from './sources/myanime';
+import { filminvazioScraper } from './sources/filminvazio';
+import { filminvazioccScraper } from './sources/filminvaziocc';
+import { netmoziScraper } from './sources/netmozi';
+import { onlinefilmekingyenScraper } from './sources/onlinefilmekingyen';
+import { jobbmintatvScraper } from './sources/jobbmintatv';
+import { filmiScraper } from './sources/filmi';
+import { hdmoziScraper } from './sources/hdmozi';
+import { mozigoScraper } from './sources/mozigo';
+import { mozisarokScraper } from './sources/mozisarok';
+import { filmezzmoziScraper } from './sources/filmezzmozi';
+import { filmdepoScraper } from './sources/filmdepo';
+import { mooviedoamScraper } from './sources/mooviedoam';
+import { moziboxScraper } from './sources/mozibox';
+import { napifilmScraper } from './sources/napifilm';
+import { filmsarokScraper } from './sources/filmsarok';
+import { mozikatalogusScraper } from './sources/mozikatalogus';
+import { sorozatoknetScraper } from './sources/sorozatoknet';
+import { filmezekScraper } from './sources/filmezek';
+import { sorozatccScraper } from './sources/sorozatcc';
+import { onlinefilmvilag2Scraper } from './sources/onlinefilmvilag2';
 import { nunflixScraper } from './sources/nunflix';
 import { pelisplushdScraper } from './sources/pelisplushd';
 import { primewireScraper } from './sources/primewire';
@@ -106,7 +137,7 @@ import { zunimeScraper } from './sources/zunime';
 
 export function gatherAllSources(): Array<Sourcerer> {
   // all sources are gathered here
-  return [
+  const sources: Array<Sourcerer> = [
     cuevana3Scraper,
     ridooMoviesScraper,
     hdRezkaScraper,
@@ -149,7 +180,55 @@ export function gatherAllSources(): Array<Sourcerer> {
     movies4fScraper,
     debridScraper,
     cinehdplusScraper,
+    netmoziScraper,
+    filminvazioScraper,
+    filminvazioccScraper,
+    dmdamediaScraper,
+    onlinefilmekingyenScraper,
+    jobbmintatvScraper,
+    filmiScraper,
+    hdmoziScraper,
+    mozigoScraper,
+    mozisarokScraper,
+    filmezzmoziScraper,
+    filmdepoScraper,
+    mooviedoamScraper,
+    moziboxScraper,
+    napifilmScraper,
+    filmsarokScraper,
+    mozikatalogusScraper,
+    sorozatoknetScraper,
+    filmezekScraper,
+    sorozatccScraper,
+    onlinefilmvilag2Scraper,
   ];
+
+  // Temporarily disable all other sources except Hungarian sources
+  return sources.map((s) =>
+    s.id === 'netmozi' ||
+    s.id === 'filminvazio' ||
+    s.id === 'filminvaziocc' ||
+    s.id === 'dmdamedia' ||
+    s.id === 'onlinefilmekingyen' ||
+    s.id === 'jobbmintatv' ||
+    s.id === 'filmi' ||
+    s.id === 'hdmozi' ||
+    s.id === 'mozigo' ||
+    s.id === 'mozisarok' ||
+    s.id === 'filmezzmozi' ||
+    s.id === 'filmdepo' ||
+    s.id === 'mooviedoam' ||
+    s.id === 'mozibox' ||
+    s.id === 'napifilm' ||
+    s.id === 'filmsarok' ||
+    s.id === 'mozikatalogus' ||
+    s.id === 'sorozatoknet' ||
+    s.id === 'filmezek' ||
+    s.id === 'sorozatcc' ||
+    s.id === 'onlinefilmvilag2'
+      ? s
+      : { ...s, disabled: true },
+  );
 }
 
 export function gatherAllEmbeds(): Array<Embed> {
@@ -219,5 +298,15 @@ export function gatherAllEmbeds(): Array<Embed> {
     filelionsScraper,
     droploadScraper,
     supervideoScraper,
+    videaScraper,
+    indavideoScraper,
+    vidaraScraper,
+    vidmolyScraper,
+    voeScraper,
+    rubyvidScraper,
+    rpmshareScraper,
+    okruScraper,
+    vkScraper,
+    fsstScraper,
   ];
 }

@@ -4,7 +4,7 @@ import { FeatureMap, flagsAllowedInFeatures } from '@/entrypoint/utils/targets';
 import { UseableFetcher } from '@/fetchers/types';
 import { EmbedOutput, SourcererOutput } from '@/providers/base';
 import { ProviderList } from '@/providers/get';
-import { Stream } from '@/providers/streams';
+import { Qualities, Stream } from '@/providers/streams';
 import { ScrapeContext } from '@/utils/context';
 import { NotFoundError } from '@/utils/errors';
 import { reorderOnIdList } from '@/utils/list';
@@ -39,6 +39,23 @@ export type ProviderRunnerOptions = {
   proxyStreams?: boolean; // temporary
 };
 
+function getStreamQualityScore(stream: Stream): number {
+  if (stream.type === 'hls') {
+    // HLS playlists are adaptive multi-bitrate streams (typically 720p/1080p+)
+    return 1080;
+  }
+  if (stream.type === 'file') {
+    const qualities = Object.keys(stream.qualities) as Qualities[];
+    if (qualities.includes('4k')) return 2160;
+    if (qualities.includes('1080')) return 1080;
+    if (qualities.includes('720')) return 720;
+    if (qualities.includes('480')) return 480;
+    if (qualities.includes('360')) return 360;
+    return 1;
+  }
+  return 0;
+}
+
 export async function runAllProviders(list: ProviderList, ops: ProviderRunnerOptions): Promise<RunOutput | null> {
   const sources = reorderOnIdList(ops.sourceOrder ?? [], list.sources).filter((source) => {
     if (ops.media.type === 'movie') return !!source.scrapeMovie;
@@ -48,6 +65,9 @@ export async function runAllProviders(list: ProviderList, ops: ProviderRunnerOpt
   const embeds = reorderOnIdList(ops.embedOrder ?? [], list.embeds);
   const embedIds = embeds.map((embed) => embed.id);
   let lastId = '';
+
+  let bestResult: RunOutput | null = null;
+  let bestScore = 0;
 
   const contextBase: ScrapeContext = {
     fetcher: ops.fetcher,
@@ -109,15 +129,28 @@ export async function runAllProviders(list: ProviderList, ops: ProviderRunnerOpt
     }
     if (!output) throw new Error('Invalid media type');
 
-    // return stream is there are any
-    if (output.stream?.[0]) {
-      const playableStream = await validatePlayableStream(output.stream[0], ops, source.id);
-      if (!playableStream) throw new NotFoundError('No streams found');
-
-      return {
-        sourceId: source.id,
-        stream: playableStream,
-      };
+    // check direct stream if any
+    if (output.stream && output.stream.length > 0) {
+      for (const st of output.stream) {
+        try {
+          const playableStream = await validatePlayableStream(st, ops, source.id);
+          if (playableStream) {
+            const score = getStreamQualityScore(playableStream);
+            if (score > bestScore) {
+              bestScore = score;
+              bestResult = {
+                sourceId: source.id,
+                stream: playableStream,
+              };
+            }
+            if (bestScore >= 1080) {
+              return bestResult;
+            }
+          }
+        } catch {
+          // ignore stream validation failure and continue
+        }
+      }
     }
 
     // filter disabled and run embed scrapers on listed embeds
@@ -165,7 +198,26 @@ export async function runAllProviders(list: ProviderList, ops: ProviderRunnerOpt
         const playableStream = await validatePlayableStream(embedOutput.stream[0], ops, embed.embedId);
         if (!playableStream) throw new NotFoundError('No streams found');
 
-        embedOutput.stream = [playableStream];
+        ops.events?.update?.({
+          id,
+          percentage: 100,
+          status: 'success',
+        });
+
+        const score = getStreamQualityScore(playableStream);
+        if (score > bestScore) {
+          bestScore = score;
+          bestResult = {
+            sourceId: source.id,
+            embedId: scraper.id,
+            stream: playableStream,
+          };
+        }
+
+        // If top-tier quality stream (1080p, 4k, HLS) found, return immediately
+        if (bestScore >= 1080) {
+          return bestResult;
+        }
       } catch (error) {
         const updateParams: UpdateEvent = {
           id,
@@ -178,15 +230,13 @@ export async function runAllProviders(list: ProviderList, ops: ProviderRunnerOpt
         ops.events?.update?.(updateParams);
         continue;
       }
+    }
 
-      return {
-        sourceId: source.id,
-        embedId: scraper.id,
-        stream: embedOutput.stream[0],
-      };
+    if (bestScore >= 1080) {
+      return bestResult;
     }
   }
 
-  // no providers or embeds returns streams
-  return null;
+  // return the highest quality stream found across all sources and embeds
+  return bestResult;
 }

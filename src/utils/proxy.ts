@@ -78,7 +78,11 @@ export function createM3U8ProxyUrl(url: string, features?: FeatureMap, headers: 
     return url;
   }
 
-  // Otherwise, use the external M3U8 proxy
+  // Otherwise, use the external M3U8 proxy if a valid proxy is configured
+  if (!CONFIGURED_M3U8_PROXY_URL || CONFIGURED_M3U8_PROXY_URL.includes('proxy2.pstream.')) {
+    return url;
+  }
+
   const encodedUrl = encodeURIComponent(url);
   const encodedHeaders = encodeURIComponent(JSON.stringify(headers));
   return `${CONFIGURED_M3U8_PROXY_URL}/m3u8-proxy?url=${encodedUrl}${headers ? `&headers=${encodedHeaders}` : ''}`;

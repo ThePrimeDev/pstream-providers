@@ -6,7 +6,7 @@ export type FullUrlOptions = Pick<FetcherOptions, 'query' | 'baseUrl'>;
 export function makeFullUrl(url: string, ops?: FullUrlOptions): string {
   // glue baseUrl and rest of url together
   let leftSide = ops?.baseUrl ?? '';
-  let rightSide = url;
+  let rightSide = url ?? '';
 
   // left side should always end with slash, if its set
   if (leftSide.length > 0 && !leftSide.endsWith('/')) leftSide += '/';

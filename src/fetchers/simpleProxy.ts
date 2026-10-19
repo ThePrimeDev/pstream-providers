@@ -53,6 +53,11 @@ export function makeSimpleProxyFetcher(proxyUrl: string, f: FetchLike): Fetcher 
       }
     });
 
+    if (!proxyUrl) {
+      const directFetcher = makeStandardFetcher(f);
+      return directFetcher(url, ops);
+    }
+
     const fullUrl = makeFullUrl(url, ops);
 
     const headerEntries = Object.entries(ops.headers).map((entry) => {

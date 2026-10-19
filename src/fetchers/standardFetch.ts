@@ -3,9 +3,9 @@ import { makeFullUrl } from '@/fetchers/common';
 import { FetchLike, FetchReply } from '@/fetchers/fetch';
 import { Fetcher } from '@/fetchers/types';
 
-function getHeaders(list: string[], res: FetchReply): Headers {
+function getHeaders(list: string[] | undefined, res: FetchReply): Headers {
   const output = new Headers();
-  list.forEach((header) => {
+  (list ?? []).forEach((header) => {
     const realHeader = header.toLowerCase();
     const realValue = res.headers.get(realHeader);
     const extraValue = res.extraHeaders?.get(realHeader);
